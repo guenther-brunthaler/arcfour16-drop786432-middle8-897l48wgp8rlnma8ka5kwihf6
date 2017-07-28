@@ -76,11 +76,6 @@ int main(int argc, char **argv) {
             break;
          }
       }
-      {
-         FILE *out= fopen("k", "wb");
-         fwrite(keybuf, sizeof *sbox, keylength, out);
-         fclose(out);
-      }
       /* Run key setup. */
       for (i= DIM(sbox); i--; ) sbox[i]= i;
       j= 0;
@@ -91,6 +86,11 @@ int main(int argc, char **argv) {
             SWAP(unsigned short, sbox[i], sbox[j]);
             if (++imodklen == keylength) imodklen= 0;
          }
+      }
+      {
+         FILE *out= fopen("k", "wb");
+         fwrite(sbox, sizeof *sbox, DIM(sbox), out);
+         fclose(out);
       }
       have.needs2run= 1;
    }
