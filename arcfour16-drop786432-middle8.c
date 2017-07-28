@@ -12,15 +12,6 @@
 #include <limits.h>
 #include <assert.h>
 
-#if __STDC_VERSION__ >= 199901
-   #include <stdint.h>
-#else
-   #ifdef uint_fast16_t
-      #undef uint_fast16_t
-   #endif
-   #define uint_fast16_t unsigned short
-#endif 
-
 #define DIM(array) (sizeof(array) / sizeof *(array))
 
 #define SWAP(type, var1, var2) { \
@@ -38,8 +29,8 @@ int main(int argc, char **argv) {
    } have= {0};
    char const *error= 0;
    FILE *kfile;
-   static uint_fast16_t sbox[1 << 16];
-   uint_fast16_t (*keybuf)[DIM(sbox)];
+   static unsigned short sbox[1 << 16];
+   unsigned short (*keybuf)[DIM(sbox)];
    unsigned i, j;
    if (argc != 2) {
       error= "A single argument is required: File containing encryption key";
@@ -58,7 +49,7 @@ int main(int argc, char **argv) {
       goto fail;
    }
    have.kfile= 1;
-   #define SBOX_MASK ((uint_fast16_t)(DIM(sbox) - 1))
+   #define SBOX_MASK ((unsigned short)(DIM(sbox) - 1))
    /* Read the key into memory. */
    {
       unsigned keylength;
@@ -77,7 +68,7 @@ int main(int argc, char **argv) {
                goto fail;
             }
             (*keybuf)[keylength]=
-               (uint_fast16_t)high << 8 | (uint_fast16_t)low
+               (unsigned short)high << 8 | (unsigned short)low
             ;
          } else {
             if (ferror(kfile)) goto krerr;
@@ -97,7 +88,7 @@ int main(int argc, char **argv) {
          unsigned imodklen;
          for (i= imodklen= 0; i < DIM(sbox); ++i) {
             j= j + sbox[i] + (*keybuf)[imodklen] & SBOX_MASK;
-            SWAP(uint_fast16_t, sbox[i], sbox[j]);
+            SWAP(unsigned short, sbox[i], sbox[j]);
             if (++imodklen == keylength) imodklen= 0;
          }
       }
@@ -118,7 +109,7 @@ int main(int argc, char **argv) {
       #define DO_ROUND do { \
          i= i + 1 & SBOX_MASK; \
          j= sbox[i] + j & SBOX_MASK; \
-         SWAP(uint_fast16_t, sbox[i], sbox[j]); \
+         SWAP(unsigned short, sbox[i], sbox[j]); \
       } while (0)
       {
          unsigned drop;
