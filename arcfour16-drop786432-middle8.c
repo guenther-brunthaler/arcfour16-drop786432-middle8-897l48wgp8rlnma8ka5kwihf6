@@ -1,5 +1,16 @@
+/*
+ * Implementation of ARCFOUR extended to 16 bits.
+ *
+ * Copyright (c) 2017 Guenther Brunthaler. All rights reserved.
+ *
+ * This source file is free software.
+ * Distribution is permitted under the terms of the GPLv3.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <assert.h>
 
 #if __STDC_VERSION__ >= 199901
    #include <stdint.h>
@@ -28,10 +39,9 @@ int main(int argc, char **argv) {
    char const *error= 0;
    FILE *kfile;
    static uint_fast16_t sbox[1 << 16];
-   #define SBOX_MASK ((uint_fast16_t)(DIM(sbox) - 1))
    uint_fast16_t (*keybuf)[DIM(sbox)];
    unsigned i, j;
-   if (argc != 1) {
+   if (argc != 2) {
       error= "A single argument is required: File containing encryption key";
       fail:
       (void)fputs(error, stderr);
@@ -48,18 +58,21 @@ int main(int argc, char **argv) {
       goto fail;
    }
    have.kfile= 1;
+   #define SBOX_MASK ((uint_fast16_t)(DIM(sbox) - 1))
    /* Read the key into memory. */
    {
       unsigned keylength;
       for (keylength= 0; keylength < DIM(*keybuf); ++keylength) {
          int low, high;
-         if ((high= fgetc(kfile) != EOF) {
-            if ((low= fgetc(kfile) == EOF) {
+         if ((high= fgetc(kfile)) != EOF) {
+            /* Big endian rulez: Important things should always come first! */
+            if ((low= fgetc(kfile)) == EOF) {
                if (ferror(kfile)) {
                   krerr:
                   error= "Error reading key file!";
                   goto fail;
                }
+               assert(feof(kfile));
                error= "Key file needs to contain an even number of bytes!";
                goto fail;
             }
@@ -68,18 +81,24 @@ int main(int argc, char **argv) {
             ;
          } else {
             if (ferror(kfile)) goto krerr;
+            assert(feof(kfile));
             break;
          }
       }
-      /* Key setup. */
+      {
+         FILE *out= fopen("k", "wb");
+         fwrite(keybuf, sizeof *sbox, keylength, out);
+         fclose(out);
+      }
+      /* Run key setup. */
       for (i= DIM(sbox); i--; ) sbox[i]= i;
       j= 0;
       {
-         int imodklen;
+         unsigned imodklen;
          for (i= imodklen= 0; i < DIM(sbox); ++i) {
-            j= j + sbox[i] + (*key)[i0] & SBOX_MASK;
+            j= j + sbox[i] + (*keybuf)[imodklen] & SBOX_MASK;
             SWAP(uint_fast16_t, sbox[i], sbox[j]);
-            if (++i0 == keylength) i0= 0;
+            if (++imodklen == keylength) imodklen= 0;
          }
       }
       have.needs2run= 1;
@@ -88,7 +107,7 @@ int main(int argc, char **argv) {
    if (have.kfile) {
       have.kfile= 0;
       if (fclose(kfile)) {
-         error= "Internal error. Should not normally occur."
+         error= "Internal error. Should not normally occur.";
          goto fail;
       }
    }
@@ -110,17 +129,19 @@ int main(int argc, char **argv) {
          while ((c= getchar()) != EOF) {
             DO_ROUND;
             c^= (int)(
-               sbox[sbox[i] + sbox[j] & SBOX_MASK] >> (16 - 8 >> 1)
+               sbox[sbox[i] + sbox[j] & SBOX_MASK] >> (16 - 8 >> 1) & UCHAR_MAX
             );
             if (putchar(c) != c) {
-               error= "Error writing to standard output!"
+               assert(ferror(stdout));
+               error= "Error writing to standard output!";
                goto fail;
             }
          }
-         if (ferror(stdin) {
-            error= "Error reading standard input!"
+         if (ferror(stdin)) {
+            error= "Error reading standard input!";
             goto fail;
          }
+         assert(feof(stdin));
       }
       #undef DO_ROUND
    }
@@ -128,7 +149,7 @@ int main(int argc, char **argv) {
    if (!have.flushed) {
       have.flushed= 1;
       if (fflush(0)) {
-         error= "Error writing remaining output."
+         error= "Error writing remaining output.";
          goto fail;
       }
    }
