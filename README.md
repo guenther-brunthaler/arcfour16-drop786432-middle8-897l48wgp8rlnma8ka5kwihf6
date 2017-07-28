@@ -165,7 +165,7 @@ Here is to how to properly pad password.txt with a zero byte
 
 -----
 
-arcfour16-drop786432-middle8 version 2017.209
+arcfour16-drop786432-middle8 version 2017.209.1
 
 Copyright (c) 2017 Guenther Brunthaler. All rights reserved.
 

@@ -68,7 +68,8 @@ int main(int argc, char **argv) {
                goto fail;
             }
             (*keybuf)[keylength]=
-               (unsigned short)high << 8 | (unsigned short)low
+                  (unsigned short)((unsigned)high << 8)
+               |  (unsigned short)(unsigned)low
             ;
          } else {
             if (ferror(kfile)) goto krerr;
@@ -77,7 +78,7 @@ int main(int argc, char **argv) {
          }
       }
       /* Run key setup. */
-      for (i= DIM(sbox); i--; ) sbox[i]= i;
+      for (i= DIM(sbox); i--; ) sbox[i]= (unsigned short)i;
       j= 0;
       {
          unsigned imodklen;
