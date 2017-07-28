@@ -1,4 +1,3 @@
-LIB =
 OBJECTS = $(SOURCES:.c=.o)
 TARGETS = $(OBJECTS:.o=)
 
@@ -17,6 +16,11 @@ AUG_CFLAGS = $(COMBINED_CFLAGS)
 .c.o:
 	$(CC) $(AUG_CFLAGS) -c $<
 
+.SUFFIXES: .html .md
+.md.html:
+	markdown < $< > $@
+
+LIB =
 include dependencies.mk
 include targets.mk
 
