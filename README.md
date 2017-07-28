@@ -74,7 +74,7 @@ If the number of bits needed to represent the number of possible
 internal states of ARCFOUR is considered its "maximal security",
 then the following figures apply to ARCFOUR:
 
-ARCFOUR-8: floor(log2(256 * 256!)) = 1691 bit
+ARCFOUR-8: floor(log2(256 * 256!)) = 1691 bit  
 ARCFOUR-16: floor(log2(65536 * 65536!)) = ??? bit
 
 Unfortunately, my CAS software was not able to calculate the
