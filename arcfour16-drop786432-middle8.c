@@ -87,11 +87,6 @@ int main(int argc, char **argv) {
             if (++imodklen == keylength) imodklen= 0;
          }
       }
-      {
-         FILE *out= fopen("k", "wb");
-         fwrite(sbox, sizeof *sbox, DIM(sbox), out);
-         fclose(out);
-      }
       have.needs2run= 1;
    }
    cleanup:
