@@ -35,10 +35,15 @@ static char const help_usage[]= {
          "Encryption and decryption work exactly the same with this\n"
          "program. It will always know what you want and automatically do\n"
          "the right thing.\n"
+         "\n"
+         "Bug: There is no integrity protection at all. An active attacker\n"
+         "can change any part of the encrypted file and you will never\n"
+         "know. When in doubt, send a cryptographically signed\n"
+         "cryptographic hash of the encrypted file along with it.\n"
          /* } SPECIAL INDENDATION END */
    /* End of specially indented text. */
    "\n"
-   "version 2017.209.2\n"
+   "version 2017.210\n"
    "\n"
    "Copyright (c) 2017 Guenther Brunthaler. All rights reserved.\n"
    "\n"
