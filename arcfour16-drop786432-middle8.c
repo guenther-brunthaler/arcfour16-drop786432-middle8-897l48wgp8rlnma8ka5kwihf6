@@ -1,11 +1,50 @@
-/*
- * Implementation of ARCFOUR extended to 16 bits.
- *
- * Copyright (c) 2017 Guenther Brunthaler. All rights reserved.
- *
- * This source file is free software.
- * Distribution is permitted under the terms of the GPLv3.
- */
+/* Implementation of ARCFOUR extended to 16 bits. */
+static char const help_usage[]= {
+   /* Maintain the special indentation of the following block for a
+    * target line width of 66 columns. */
+         /* SPECIAL INDENDATION START { */
+         "This program reads from standard input, encrypts/decrypts it, and\n"
+         "writes the result to standard output.\n"
+         "\n"
+         "A single argument is required: A file containing the binary\n"
+         "encryption key.\n"
+         "\n"
+         "This key file must not be used for encrypting more than one\n"
+         "single message, or an attacker might be able to crack all\n"
+         "messages encrypted with that key file.\n"
+         "\n"
+         "In order to allow re-using the same password for multiple\n"
+         "messages safely, create this key file as follows before sending\n"
+         "every message:\n"
+         "\n"
+         "$ { LC_ALL=C date; dd if=/dev/urandom bs=1 count=8 2> /dev/null \\\n"
+         "; } > nonce.bin \\\n"
+         "; cat nonce.bin pass_phrase.txt nonce.bin > key_file.bin\n"
+         "\n"
+         "In this example, 'key_file.bin' will be the name of the binary\n"
+         "key file which has been created by the commands.\n"
+         "\n"
+         "Then use this key file to encrypt the message and send it\n"
+         "together with 'nonce.bin' to the receiver, who must already have\n"
+         "your secret password or -phrase in 'pass_phrase.txt'.\n"
+         "\n"
+         "The receiver then uses the last line of the above multi-line\n"
+         "command sequence in order to recreate 'key_file.bin' for\n"
+         "decryption of the current message.\n"
+         "\n"
+         "Encryption and decryption work exactly the same with this\n"
+         "program. It will always know what you want and automatically do\n"
+         "the right thing.\n"
+         /* } SPECIAL INDENDATION END */
+   /* End of specially indented text. */
+   "\n"
+   "version 2017.209.2\n"
+   "\n"
+   "Copyright (c) 2017 Guenther Brunthaler. All rights reserved.\n"
+   "\n"
+   "This program is free software.\n"
+   "Distribution is permitted under the terms of the GPLv3."
+};
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +72,7 @@ int main(int argc, char **argv) {
    unsigned short (*keybuf)[DIM(sbox)];
    unsigned i, j;
    if (argc != 2) {
-      error= "A single argument is required: File containing encryption key";
+      error= help_usage;
       fail:
       (void)fputs(error, stderr);
       (void)putc('\n', stderr);
@@ -64,8 +103,9 @@ int main(int argc, char **argv) {
                   goto fail;
                }
                assert(feof(kfile));
-               error= "Key file needs to contain an even number of bytes!";
-               goto fail;
+               /* Silently pad the binary key with one zero byte rather than
+                * complaining about it being not a multiple of 16 bits. */
+               low= 0;
             }
             (*keybuf)[keylength]=
                   (unsigned short)((unsigned)high << 8)
